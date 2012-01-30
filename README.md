@@ -23,7 +23,7 @@ Create IronMQ client:
 Now you can interact with IronMQ:
 
 ```clojure
-(imqc/post-messages client "myqueue" "hello from clojure")
+(imqc/post-message client "myqueue" "hello from clojure")
 
 (let [msg (imqc/get-message client "myqueue")]
   (if msg
