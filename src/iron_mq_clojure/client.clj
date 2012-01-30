@@ -29,10 +29,11 @@
                   (:port client)
                   path)
         conn (. url openConnection)]
-    (. conn setRequestMethod method)
-    (. conn setRequestProperty "Content-Type" "application/json")
-    (. conn setRequestProperty "Authorization" (format "OAuth %s" (:token client)))
-    (. conn setRequestProperty "User-Agent" "IronMQ Clojure Client")
+    (doto conn
+      (.setRequestMethod method)
+      (.setRequestProperty "Content-Type" "application/json")
+      (.setRequestProperty "Authorization" (format "OAuth %s" (:token client)))
+      (.setRequestProperty "User-Agent" "IronMQ Clojure Client"))
     (if-not (empty? body)
       (. conn setDoOutput true))
     (. conn connect)
