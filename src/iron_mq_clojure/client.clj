@@ -2,6 +2,9 @@
   (:use [cheshire.core :only [parse-string generate-string]])
   (:import (java.net URL)))
 
+(def aws-host "mq-aws-us-east-1.iron.io")
+(def rackspace-host "mq-rackspace-dfw.iron.io")
+
 (defn create-client
   "FIXME"
   [project-id token & options]
@@ -9,7 +12,7 @@
                  :token       token
                  :api-version 1
                  :scheme      "https"
-                 :host        "mq-aws-us-east-1.iron.io"
+                 :host        aws-host
                  :port        443}]
     (merge default (apply hash-map options))))
 

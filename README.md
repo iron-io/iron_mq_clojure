@@ -20,6 +20,12 @@ Create IronMQ client:
 (def client (imqc/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN"))
 ```
 
+For Rackspace:
+
+```clojure
+(def client (imqc/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN" :host imqc/rackspace-host))
+```
+
 Now you can interact with IronMQ:
 
 ```clojure
