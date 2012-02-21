@@ -5,7 +5,7 @@
 Add dependency to your project.clj:
 
 ```clojure
-[iron_mq_clojure "1.0.0"]
+[iron_mq_clojure "1.0.1"]
 ```
 
 Require IronMQ client code:
