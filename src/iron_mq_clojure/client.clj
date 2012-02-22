@@ -6,7 +6,7 @@
 (def rackspace-host "mq-rackspace-dfw.iron.io")
 
 (defn create-client
-  "Returns an IronMQ client from the passed project-id, token, and options.
+  "Creates an IronMQ client from the passed project-id, token, and options.
   project-id can be obtained from hud.iron.io
   token can be obtained from hud.iron.io/tokens
   
