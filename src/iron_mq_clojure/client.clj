@@ -6,7 +6,15 @@
 (def rackspace-host "mq-rackspace-dfw.iron.io")
 
 (defn create-client
-  "FIXME"
+  "Returns an IronMQ client from the passed project ID, token, and options.
+  Project ID can be obtained from hud.iron.io
+  Token can be obtained from hud.iron.io/tokens
+  
+  Options can be:
+  API Version: the version of the API to use, as an int. Defaults to 1.
+  Scheme: the HTTP scheme to use when communicating with the server. Defaults to https.
+  Host: the API's host. Defaults to aws-host, the IronMQ AWS cloud. Can be a string 
+        or rackspace-host, which holds the host for the IronMQ Rackspace cloud."
   [project-id token & options]
   (let [default {:project-id  project-id
                  :token       token
