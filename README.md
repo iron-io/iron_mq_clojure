@@ -11,31 +11,31 @@ Add dependency to your project.clj:
 Require IronMQ client code:
 
 ```clojure
-(require '[iron-mq-clojure.client :as imqc])
+(require '[iron-mq-clojure.client :as mq])
 ```
 
 Create IronMQ client:
 
 ```clojure
-(def client (imqc/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN"))
+(def client (mq/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN"))
 ```
 
 For Rackspace:
 
 ```clojure
-(def client (imqc/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN" :host imqc/rackspace-host))
+(def client (mq/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN" :host mq/rackspace-host))
 ```
 
 Now you can interact with IronMQ:
 
 ```clojure
-(imqc/post-message client "myqueue" "hello from clojure")
+(mq/post-message client "myqueue" "hello from clojure")
 
-(let [msg (imqc/get-message client "myqueue")]
+(let [msg (mq/get-message client "myqueue")]
   (if msg
     (do
       (println (get msg "body"))
-      (imqc/delete-message client "myqueue" msg))
+      (mq/delete-message client "myqueue" msg))
     (println "queue is empty")))
 
 ```
