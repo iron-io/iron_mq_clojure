@@ -5,7 +5,7 @@
 Add dependency to your project.clj:
 
 ```clojure
-[iron_mq_clojure "1.0.2"]
+[iron_mq_clojure "1.0.3"]
 ```
 
 Require IronMQ client code:
@@ -17,13 +17,13 @@ Require IronMQ client code:
 Create IronMQ client:
 
 ```clojure
-(def client (mq/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN"))
+(def client (mq/create-client "YOUR_TOKEN" "YOUR_PROJECT_ID"))
 ```
 
 For Rackspace:
 
 ```clojure
-(def client (mq/create-client "YOUR_PROJECT_ID" "YOUR_TOKEN" :host mq/rackspace-host))
+(def client (mq/create-client "YOUR_TOKEN" "YOUR_PROJECT_ID" :host mq/rackspace-host))
 ```
 
 Now you can interact with IronMQ:

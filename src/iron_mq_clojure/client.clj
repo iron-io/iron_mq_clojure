@@ -6,24 +6,26 @@
 (def rackspace-host "mq-rackspace-dfw.iron.io")
 
 (defn create-client
-  "Creates an IronMQ client from the passed project-id, token, and options.
+  "Creates an IronMQ client from the passed token, project-id and options.
 
-  project-id - can be obtained from hud.iron.io
   token - can be obtained from hud.iron.io/tokens
+  project-id - can be obtained from hud.iron.io
   
   Options can be:
   :api-version - the version of the API to use, as an int. Defaults to 1.
   :scheme - the HTTP scheme to use when communicating with the server. Defaults to https.
-  :host - the API's host. Defaults to aws-host, the IronMQ AWS cloud. Can be a string 
+  :host - the API's host. Defaults to aws-host, the IronMQ AWS cloud. Can be a string
           or rackspace-host, which holds the host for the IronMQ Rackspace cloud.
-  :port - the port, as an int, that the server is listening on. Defaults to 443."
-  [project-id token & options]
-  (let [default {:project-id  project-id
-                 :token       token
+  :port - the port, as an int, that the server is listening on. Defaults to 443.
+  :max-retries - maximum number of retries on HTTP error 503."
+  [token project-id & options]
+  (let [default {:token       token
+                 :project-id  project-id
                  :api-version 1
                  :scheme      "https"
                  :host        aws-host
-                 :port        443}]
+                 :port        443
+                 :max-retries 5}]
     (merge default (apply hash-map options))))
 
 (defn create-message
@@ -33,7 +35,7 @@
   Options can be:
   :timeout - the timeout (in seconds) after which the message will be returned to the
              queue, after a successful get-message or get-messages. Defaults to 60.
-  :delay - the delay (in seconds) before which the message will not be available on the 
+  :delay - the delay (in seconds) before which the message will not be available on the
            queue after being pushed. Defaults to 0.
   :expires_in - the number of seconds to keep the message on the queue before deleting
                 it automatically. Defaults to 604,800 (7 days). Max is 2,592,000 seconds
@@ -44,7 +46,7 @@
 (defn request
   "Sends an HTTP request to the IronMQ API.
 
-  client - an instance of an IronMQ client, created with create-client
+  client - an instance of an IronMQ client, created with create-client.
   method - a string specifying the HTTP request method (GET, POST, etc.)
   endpoint - the IronMQ API endpoint following the project ID, with a leading /
   body - a string you would like to pass with the request. Set it to nil if not passing a body."
@@ -56,22 +58,27 @@
         url (URL. (:scheme client)
                   (:host client)
                   (:port client)
-                  path)
-        conn (. url openConnection)]
-    (doto conn
-      (.setRequestMethod method)
-      (.setRequestProperty "Content-Type" "application/json")
-      (.setRequestProperty "Authorization" (format "OAuth %s" (:token client)))
-      (.setRequestProperty "User-Agent" "IronMQ Clojure Client"))
-    (if-not (empty? body)
-      (. conn setDoOutput true))
-    (. conn connect)
-    (if-not (empty? body)
-      (spit (. conn getOutputStream) body))
-    (let [status (. conn getResponseCode)]
-      (if (= status 200)
-        (parse-string (slurp (. conn getInputStream)))
-        (throw (Exception. (slurp (. conn getErrorStream))))))))
+                  path)]
+    (loop [try 0]
+      (let [conn (. url openConnection)]
+        (doto conn
+          (.setRequestMethod method)
+          (.setRequestProperty "Content-Type" "application/json")
+          (.setRequestProperty "Authorization" (format "OAuth %s" (:token client)))
+          (.setRequestProperty "User-Agent" "ironmq-clojure-1.0.3"))
+        (if-not (empty? body)
+          (. conn setDoOutput true))
+        (. conn connect)
+        (if-not (empty? body)
+          (spit (. conn getOutputStream) body))
+        (let [status (. conn getResponseCode)]
+          (if (= status 200)
+            (parse-string (slurp (. conn getInputStream)))
+            (if (and (= status 503) (< try (:max-retries client)))
+              (do
+                (Thread/sleep (* (Math/pow 4 try) 100 (Math/random)))
+                (recur (+ try 1)))
+              (throw (Exception. (slurp (. conn getErrorStream)))))))))))
 
 (defn queues
   "Returns a list of queues that a client has access to.
